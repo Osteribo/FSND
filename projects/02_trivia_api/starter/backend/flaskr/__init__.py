@@ -44,7 +44,7 @@ def create_app(test_config=None):
   Create an endpoint to handle GET requests 
   for all available categories.
   '''
-  @app.route('/categories')
+  @app.route('/categories',  methods = ['GET'])
   def get_catagories():
 
     # make a dictionary 
@@ -70,7 +70,7 @@ def create_app(test_config=None):
   Clicking on the page numbers should update the questions. 
       '''
 
-  @app.route('/questions')
+  @app.route('/questions', methods = ['GET'])
   def get_questions():
     selection = Question.query.order_by(Question.id).all()
     current_questions = paginate_questions(request, selection)
@@ -132,6 +132,7 @@ def create_app(test_config=None):
   
   @app.route('/questions', methods= ['POST'])
   def new_question():
+    blue = {}
 
 
   '''
