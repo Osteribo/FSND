@@ -26,7 +26,7 @@ def create_app(test_config=None):
   @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
   '''
 
-  cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+  cors = CORS(app, resources={'/': {"origins": "*"}})
 
 
   '''
@@ -110,7 +110,7 @@ def create_app(test_config=None):
         'success': True,
         'deleted': question_id,
         'questions': current_questions,
-        'total_books': len(Question.query.all())
+        
 
       })
 
@@ -132,7 +132,32 @@ def create_app(test_config=None):
   
   @app.route('/questions', methods= ['POST'])
   def new_question():
-    blue = {}
+    body = request.get_json()
+
+    new_question = body.get('question', None)
+    new_answer = body.get('answer', None)
+    new_category = body.get('category', None)
+    new_difficulty = body.get('difficulty', None)
+
+    try:
+      #make 
+      question = Question(question = new_question, answer = new_answer, category = new_category, difficulty = new_difficulty)
+      question.insert()
+
+    
+      selection = Question.query.order_by(Question.id).all()
+      current_questions = paginate_questions(request, selection)
+
+      return jsonify({
+        'success': True,
+        'created': question.id,
+        'question_created': current_questions,
+        'total_questions': len(Question.query.all())
+      })
+
+
+    except:
+      abort(422)
 
 
   '''
@@ -145,6 +170,16 @@ def create_app(test_config=None):
   only question that include that string within their question. 
   Try using the word "title" to start. 
   '''
+  
+  @app.route('/search', methods=['POST'])
+  def search_questions():
+      
+    body = request.get_json() #get infomation from webpage
+
+    search = body.get('searchTerm', None) #assign input from searchTerm from webpage/user entry into variable 
+
+    try: 
+      quesion = Question.query.order_by(Question.id).filter(Question.question.ilike('%{}%'.format(search)))
 
   '''
   @TODO: 
