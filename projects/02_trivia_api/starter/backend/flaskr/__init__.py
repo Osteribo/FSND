@@ -183,7 +183,7 @@ def create_app(test_config=None):
       current_category = [question.category for question in search_return]
       print(search_return[0])
       if search_return is None:
-        abort(410)
+        abort(400)
       if len(search_return) == 0:
         abort(406)
 
@@ -191,8 +191,8 @@ def create_app(test_config=None):
       return jsonify({
         'success': True,
         'questions': current_questions,
-        'total_questions': len(search_return), #len(question)
-        'currentCategory': current_category #question.category
+        'total_questions': len(search_return),
+        'currentCategory': current_category 
           })
     except:
       abort(422)
@@ -236,34 +236,29 @@ def create_app(test_config=None):
 
   @app.route('/quizzes', methods= ['POST'])
   def play():
-    try:
+        body = request.get_json()
+        previous_questions = body.get('previous_questions', [])
+        quiz_category = body.get('quiz_category', None)
 
-        #grab request body
-      body= request.get_json()
+        try:
+          if quiz_category:
+              if quiz_category['id'] == 0:
+                  quiz_selections = Question.query.all()
+              else:
+                  quiz_selections = Question.query.filter_by(category=quiz_category['id']).all()
 
-        #grab category input
-      category = body.get('quiz_category')
-
-        #grab previous questions
-      prev_questions = body.get('previous_questions')
-
-      if category is None or prev_questions is None:
-        abort(400)
-      
-      
-        #available_questions= Questions.query.filter(Question.id.notin_((prev_questions)).all()
-      
-     
-      available_questions = Question.query.filter_by(category=category['id']).filter(Question.id.notin((previous_questions))).all()
-      
-      new_question = available_questions[random.randrange(0, len(available_questions))]
-                                                    
-      return jsonify({
-        'success': True,
-        'question': new_question
-      })
-    except:
-      abort(422)
+          filtered_options =  [question.format() for question in quiz_selections if question.id not in previous_questions]
+          if len(filtered_options) == 0:
+              # return jsonify({
+              #     'question': False
+              # })
+              abort(422)
+          randomized_qs = random.choice(filtered_options)
+          return jsonify({
+              'question': randomized_qs
+          })
+        except:
+            abort(500)
   '''
   @TODO: 
   Create error handlers for all expected errors 
