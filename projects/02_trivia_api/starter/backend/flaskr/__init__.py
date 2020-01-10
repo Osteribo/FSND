@@ -179,8 +179,23 @@ def create_app(test_config=None):
     search = body.get('searchTerm', None) #assign input from searchTerm from webpage/user entry into variable 
 
     try: 
-      quesion = Question.query.order_by(Question.id).filter(Question.question.ilike('%{}%'.format(search)))
+      search_return = Question.query.order_by(Question.id).filter(Question.question.ilike(f'%{search}%')).all()
+      current_category = [question.category for question in search_return]
+      print(search_return[0])
+      if search_return is None:
+        abort(410)
+      if len(search_return) == 0:
+        abort(406)
 
+      current_questions = paginate_questions(request, search_return)
+      return jsonify({
+        'success': True,
+        'questions': current_questions,
+        'total_questions': len(search_return), #len(question)
+        'currentCategory': current_category #question.category
+          })
+    except:
+      abort(422)
   '''
   @TODO: 
   Create a GET endpoint to get questions based on category. 
@@ -189,6 +204,22 @@ def create_app(test_config=None):
   categories in the left column will cause only questions of that 
   category to be shown. 
   '''
+
+  @app.route('/categories/<int:category_id>/questions', methods= ['GET'])
+  def category_qs(category_id):
+    try:
+      questions = Question.query.order_by(Question.id).filter_by(category=category_id) 
+      current_category = [question.category for question in questions]
+      return jsonify({
+        'success': True,
+        'questions': [question.format() for question in questions.all()],
+        'total_questions': len(questions.all()),
+        'current_category': current_category
+      })
+
+
+    except:
+      abort(404)
 
 
   '''
@@ -206,24 +237,33 @@ def create_app(test_config=None):
   @app.route('/quizzes', methods= ['POST'])
   def play():
     try:
+
+        #grab request body
       body= request.get_json()
+
+        #grab category input
       category = body.get('quiz_category')
+
+        #grab previous questions
       prev_questions = body.get('previous_questions')
+
+      if category is None or prev_questions is None:
+        abort(400)
       
-      if category['type'] == 'click:
-        available_questions= Questions.query.filter(Question.id.notin_((prev_questions)).all()
       
-      else:
-        available_questions = Question.query.filter_by(category=category['id']).filter(Question.id.notin((previous_questions))).all()
+        #available_questions= Questions.query.filter(Question.id.notin_((prev_questions)).all()
       
-      new_question = avialable_questions[random.randrange(0, len(available_questions))]
+     
+      available_questions = Question.query.filter_by(category=category['id']).filter(Question.id.notin((previous_questions))).all()
+      
+      new_question = available_questions[random.randrange(0, len(available_questions))]
                                                     
       return jsonify({
         'success': True,
         'question': new_question
       })
-      except:
-        abort(422)
+    except:
+      abort(422)
   '''
   @TODO: 
   Create error handlers for all expected errors 
