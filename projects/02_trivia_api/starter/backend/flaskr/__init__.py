@@ -47,7 +47,7 @@ def create_app(test_config=None):
   @app.route('/categories',  methods = ['GET'])
   def get_catagories():
 
-    
+      
     categories = {}
     for category in Category.query.all():
       categories[category.id] = category.type
@@ -83,7 +83,6 @@ def create_app(test_config=None):
             'success':True,
             'questions': current_questions,
             'total_questions': len(current_questions),
-            #'current_category':  "green",
             'categories': categories
         })
 
@@ -241,6 +240,7 @@ def create_app(test_config=None):
         quiz_category = body.get('quiz_category', None)
 
         try:
+
           if quiz_category:
               if quiz_category['id'] == 0:
                   quiz_selections = Question.query.all()
