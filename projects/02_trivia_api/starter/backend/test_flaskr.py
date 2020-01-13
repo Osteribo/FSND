@@ -33,7 +33,7 @@ class TriviaTestCase(unittest.TestCase):
     TODO
     Write at least one test for each test for successful operation and for expected errors.
     """
-    def get_category_true(self):
+    def test_get_category_true(self):
         res = self.client().get('/categories')
         data = json.loads(res.data)
 
@@ -41,13 +41,47 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['success'], True)
         self.assertTrue(data['categories'])
     
-    def get_category_fail(self):
-        res = self.client().get('/categories?pages=1000')
+    def test_get_category_fail(self):
+        res = self.client().get('/categories/1000', )
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 404)
         self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'resource not found')
+    
+    def test_questions_true(self):
+        res = self.client().get('/questions')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
         self.assertTrue(data['categories'])
+        self.assertTrue(data['total_questions'])
+        self.assertTrue(data['questions'])
+
+    def test_questions_fail(self):
+        res = self.client().get('/questions?page=1000')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'resource not found')
+
+    def test_question_delete_true(self):
+        dummy_question = Question(question= 'dummy question', answer = 'dum dumn', difficulty = 4, category = 1)
+
+        dummy_question.insert()
+        question_id = dummy_question.id        
+        
+        res = self.client().delete(f'/questions/{question_id}')
+        data = json.loads(res.data)
+        
+        no_dummy_question = Question.query.filter(Question.id == dummy_question.id).one_or_none()
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertEqual(data['deleted'], question_id)
+        self.assertFalse(no_dummy_question)
+        
 
 # Make the tests conveniently executable
 if __name__ == "__main__":

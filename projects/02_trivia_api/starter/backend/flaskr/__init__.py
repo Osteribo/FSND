@@ -8,6 +8,11 @@ from models import setup_db, Question, Category
 
 QUESTIONS_PER_PAGE = 10
 
+'''
+This function creates paginated questions.
+Separated from the rest of the app to allow for reuse.
+'''
+
 def paginate_questions(request, selection):
   page = request.args.get('page', 1, type=int) #set page
   start = (page - 1) * QUESTIONS_PER_PAGE #index pages with # of questions 
@@ -47,15 +52,18 @@ def create_app(test_config=None):
   @app.route('/categories',  methods = ['GET'])
   def get_catagories():
 
-      
-    categories = {}
-    for category in Category.query.all():
-      categories[category.id] = category.type
-    return jsonify({
-            'success':True,
-            'categories': categories,
-           
-        })
+    try:
+      categories = {}
+      for category in Category.query.all():
+        categories[category.id] = category.type
+      return jsonify({
+              'success':True,
+              'categories': categories,
+            
+          })
+
+    except:
+      abort(404)
 
   '''
   @TODO: 
@@ -74,7 +82,11 @@ def create_app(test_config=None):
   def get_questions():
     selection = Question.query.order_by(Question.id).all()
     current_questions = paginate_questions(request, selection)
-
+      
+      #if no question are found abort 404
+    if len(current_questions) == 0:
+      abort(404)
+      
       #create a dictionary to hold the categories and their values
     categories = {}
     for category in Category.query.all():
