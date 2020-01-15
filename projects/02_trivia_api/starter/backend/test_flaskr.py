@@ -81,6 +81,51 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['success'], True)
         self.assertEqual(data['deleted'], question_id)
         self.assertFalse(no_dummy_question)
+
+    def test_question_delete_false(self):
+        dummy_question = Question(question= 'dummy question', answer = 'dum dumn', difficulty = 4, category = 1)
+
+        dummy_question.insert()
+        question_id = dummy_question.id        
+        
+        res = self.client().delete(f'/questions/{1}')
+        data = json.loads(res.data)
+        
+        no_dummy_question = Question.query.filter(Question.id == dummy_question.id).one_or_none()
+        self.assertEqual(res.status_code, 422)
+        self.assertEqual(data['success'], False )
+        self.assertEqual(data['message'], 'failed to proccess')
+
+    def test_add_question(self):
+        dummy_question = {
+            'question': 'dummy question', 
+            'answer': 'dum dumn', 
+            'difficulty': 4, 
+            'category': 1
+            }
+
+        before_post_questions = len(Question.query.all())
+        res = self.client().post('/questions', json=dummy_question)
+        data = json.loads(res.data)
+        after_post_questions = len(Question.query.all())
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(data['created'])
+        self.assertTrue(before_post_questions < after_post_questions)
+
+    def test_add_question_fail(self):
+            #tries to add a question missing information
+        dummy_question = {
+            
+            }
+
+        res = self.client().post('/questions', json=dummy_question)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 422)
+        self.assertEqual(data['success'], False )
+        self.assertEqual(data['message'], 'failed to proccess')
         
 
 # Make the tests conveniently executable
