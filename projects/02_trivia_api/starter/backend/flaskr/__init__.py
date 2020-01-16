@@ -212,7 +212,7 @@ def create_app(test_config=None):
         'currentCategory': current_category 
           })
     except:
-      abort(422)
+      abort(404)
   '''
   @TODO: 
   Create a GET endpoint to get questions based on category. 
@@ -267,16 +267,15 @@ def create_app(test_config=None):
 
           filtered_options =  [question.format() for question in quiz_selections if question.id not in previous_questions]
           if len(filtered_options) == 0:
-              # return jsonify({
-              #     'question': False
-              # })
               abort(422)
+
           randomized_qs = random.choice(filtered_options)
           return jsonify({
+              'success': True,
               'question': randomized_qs
           })
         except:
-            abort(500)
+            abort(422)
   '''
   @TODO: 
   Create error handlers for all expected errors 

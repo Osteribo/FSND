@@ -126,7 +126,65 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 422)
         self.assertEqual(data['success'], False )
         self.assertEqual(data['message'], 'failed to proccess')
-        
+    
+    def test_search(self):
+        search_input = {'searchTerm' : 'a'}
+        res = self.client().post('/search', json = search_input)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(data['total_questions']>0)
+        self.assertTrue(data['currentCategory'])
+    
+    def test_search_404(self):  #needs WORK!!!!
+        search_input = { }
+        res = self.client().post('/search', json = search_input)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data['success'], False)
+
+    def test_category_qs(self):
+        res = self.client().get('/categories/1/questions')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(len(data['questions']))
+        self.assertTrue(data['total_questions'] > 0)
+        self.assertTrue(data['current_category'])
+
+    def test_category_qs_404(self):
+        res = self.client().get('/categories/dummy/questions')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertTrue(data['message'])
+
+    def test_quizzes_true(self):
+        dummy_quiz = {'previous_questions': [], 'quiz_category': {'Type': 'Science', 'id': 2}}
+
+
+        res = self.client().post('/quizzes', json = dummy_quiz)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+
+    def test_quizzes_false(self):
+        dummy_quiz = {'quiz_category': {}}
+
+
+        res = self.client().post('/quizzes', json = dummy_quiz)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 422)
+        self.assertEqual(data['success'], False)
+    
+
+
 
 # Make the tests conveniently executable
 if __name__ == "__main__":
