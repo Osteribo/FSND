@@ -88,8 +88,64 @@ GET '/categories'
 '6' : "Sports"}
 
 ```
+GET /questions
+- fetches a dictionary of question from the database by id with category, answer and rating 
+- has no request arguments
+- Returns: an object with all the questions and their associated information
 
+DELETE /questions/<int:questions_id>
+- fetches a question from the database with
+- Request: needs the id of the question that will be pulled from the database
+- Returns: this returns an object with information from the question 
 
+{
+    'success': True,
+    'deleted': 1,
+    'questions': current_questions,
+}
+
+POST /questions 
+- Inserts a new question into the database
+- Request: a string for question and answer. integer for difficulty. category with string
+- Returns: pagination of the questions. 
+{
+        'success': True,
+        'created': 1,
+        'question_created': current_questions,
+        'total_questions': len(Question.query.all()
+}
+
+POST /search 
+- Searches questions in database for the input string
+- Request: input as string into the search bar
+- Returns: the questions with the search string
+{
+        'success': True,
+        'questions': current_questions,
+        'total_questions': len(search_return),
+        'currentCategory': current_category 
+}
+
+GET /categories/<int:category_id>/questions
+- gets all the questions in a specific category
+- Requests: input or click on category id
+- Returns: The questions associated with the category and paginates them
+{
+    'success': True,
+    'questions': [question.format() for question in questions.all()],
+    'total_questions': len(questions.all()),
+    'current_category': current_category
+}
+
+POST /quizzes
+- starts the quiz game by showing trivia questions
+- Requests: takes in the previous questions and preferred quiz category
+- Returns: Randomize questions to answer
+
+{
+    'success': True,
+    'question': randomized_qs
+}
 ## Testing
 To run the tests, run
 ```
