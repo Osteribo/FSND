@@ -19,3 +19,7 @@ Follow instructions on the [Postman docs](https://www.getpostman.com/) to instal
 ### Run the Server
 
 On first run, execute `export FLASK_APP=FlaskRecap.py`. Then run `flask run --reload` to run the developer server.
+
+### Includes the walkthrough for sending tokens
+
+

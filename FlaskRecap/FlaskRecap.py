@@ -1,5 +1,7 @@
 from flask import Flask, request, jsonify, abort
 
+from functools import wraps
+
 app = Flask(__name__)
 
 greetings = {
@@ -31,3 +33,45 @@ def greeting_add():
         abort(422)
     greetings[info['lang']] = info['greeting']
     return jsonify({'greetings':greetings})
+
+'''
+Identity and authentication walkthrough 
+
+'''
+
+def get_token_auth_header():
+    if 'Authorization' not in request.headers:
+        abort(401)
+
+
+    auth_header = request.headers['Authorization']
+    headers_parts = auth_header.split(' ')
+
+    if len(headers_parts) != 2: # malformed header
+        abort(401)
+
+    if headers_parts[0].lower() != 'bearer': #ensure it is a bearer token
+        abort(401)
+
+        #return second part of header
+    return headers_parts[1] 
+
+
+
+    #decorator
+def requires_auth(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        jwt = get_token_auth_header()
+        return f(jwt, *args, **kwargs)
+    return wrapper
+
+@app.route('/headers')
+@requires_auth
+def headers(jwt):
+
+    
+
+    print(jwt)
+    return 'not impletmented'
+    
