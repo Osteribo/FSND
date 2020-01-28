@@ -29,7 +29,17 @@ CORS(app)
 '''
 @app.route('/drinks')
 def show_drinks():
-    
+    try:
+        # drinks = {}
+        # for drink in Drink.query.all():
+        #     drinks[drinks.id] = drinks.short()
+        drinks = Drink.query.all()
+        return jsonify({
+            'success': True,
+            'drinks': [drink.short() for drink in drinks]
+        })
+    except:
+        abort(400)
 
 '''
 @TODO implement endpoint
