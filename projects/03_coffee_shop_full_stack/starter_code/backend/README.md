@@ -60,9 +60,9 @@ The `--reload` flag will detect file changes and restart the server automaticall
         - Enable RBAC
         - Enable Add Permissions in the Access Token
 5. Create new API permissions:
-    - `get:drinks-detail`
-    - `post:drinks`
+    - `post:d
     - `patch:drinks`
+    - `get:drinks-detail`
     - `delete:drinks`
 6. Create new roles for:
     - Barista

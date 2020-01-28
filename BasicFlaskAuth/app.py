@@ -104,21 +104,32 @@ def verify_decode_jwt(token):
                 'description': 'Unable to find the appropriate key.'
             }, 400)
 
+def check_permissions(permission, payload):
+    if 'permissions' not in payload:
+        abort(400)
+    if permission not in payload['permissions']:
+        abort(403)
 
-def requires_auth(f):
-    @wraps(f)
-    def wrapper(*args, **kwargs):
-        token = get_token_auth_header()
-        try:
-            payload = verify_decode_jwt(token)
-        except:
-            abort(401)
-        return f(payload, *args, **kwargs)
+    return True
+def requires_auth(permission=''):
+    def requires_auth_decor(f):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            token = get_token_auth_header()
+            try:
+                payload = verify_decode_jwt(token)
+            except:
+                abort(401)
 
-    return wrapper
+            check_permissions(permission, payload)
+            return f(payload, *args, **kwargs)
 
-@app.route('/headers')
-@requires_auth
-def headers(payload):
-    print(payload)
+        return wrapper
+    return requires_auth_decor
+
+@app.route('/images')
+@requires_auth('get:images')
+def headers(jwt):
+    print(jwt)
     return 'Access Granted'
+    

@@ -73,5 +73,10 @@ def headers(jwt):
     
 
     print(jwt)
-    return 'not impletmented'
-    
+    return 'not implemented'
+
+@app.route('/image')
+@requires_auth
+def images(jwt):
+    print(jwt)
+    return 'not implemented'
