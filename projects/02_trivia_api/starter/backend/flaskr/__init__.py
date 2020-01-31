@@ -319,4 +319,4 @@ def create_app(test_config=None):
             "error": 500,
             "message": "internal server error"
         })
-        return app
+    return app
