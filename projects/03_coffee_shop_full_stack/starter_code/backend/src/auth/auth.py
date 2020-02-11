@@ -5,7 +5,7 @@ from jose import jwt
 from urllib.request import urlopen
 
 
-AUTH0_DOMAIN = 'udacity-fsnd.auth0.com'
+AUTH0_DOMAIN = 'fsdn.auth0.com'
 ALGORITHMS = ['RS256']
 API_AUDIENCE = 'dev'
 
@@ -58,7 +58,7 @@ def get_token_auth_header():
     token = parts[1]
     return token
     
-    raise Exception('Not Implemented')
+    
 
 
 '''

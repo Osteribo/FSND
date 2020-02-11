@@ -16,7 +16,7 @@ CORS(app)
 !! NOTE THIS WILL DROP ALL RECORDS AND START YOUR DB FROM SCRATCH
 !! NOTE THIS MUST BE UNCOMMENTED ON FIRST RUN
 '''
-db_drop_and_create_all()
+# db_drop_and_create_all()
 
 ## ROUTES
 '''
@@ -51,12 +51,10 @@ def show_drinks():
 '''
 
 @app.route('/drinks-detail')
-# @requires_auth('get:drinks-detail')
+@requires_auth('get:drinks-detail')
 def concoctions():
     try:
-        
         drinks = Drink.query.all()
-
         return jsonify({
             'success': True,
             'drinks': [drink.long() for drink in drinks]
@@ -76,7 +74,7 @@ def concoctions():
 '''
 
 @app.route('/drinks', methods = ['POST'])
-# requires_auth('post:drinks')
+@requires_auth('post:drinks')
 def new_drank():
     # drank_title = json.get_request('title')
     # drank_recipe = json.get_request('recipe')
@@ -85,17 +83,21 @@ def new_drank():
     # new_drink = Drink(title = body['title'], recipe = """{}""".format(body['recipe']))
     # Drink.insert(new_drink)
     body = request.get_json()
-  
+    print(body)
     
     ## if no form data 
     if body == None:
         abort(404)
     new_recipe = body.get('recipe')
+    print(new_recipe)
     new_title = body.get('title')
+    print(new_title)
     try:
         new_drink = Drink(title=new_title, recipe=json.dumps(new_recipe))
+        print(new_drink)
         new_drink.insert()
         new_drink = Drink.query.filter_by(id= new_drink.id).first()
+        print(new_drink)
         return jsonify({
             'success': True,
             'drinks': new_drink
@@ -116,7 +118,7 @@ def new_drank():
 '''
 
 @app.route('/drinks/<int:drink_id>', methods = ['PATCH'])
-
+@requires_auth('patch:drinks')
 def edit_drank(drink_id):
 
         # grab information from front end in a simplified format
@@ -147,7 +149,8 @@ def edit_drank(drink_id):
         or appropriate status code indicating reason for failure
 '''
 
-@app.route('drinks/<int:drink_id>')
+@app.route('/drinks/<int:drink_id>')
+@requires_auth('delete:drinks')
 def delete_da_drink(drink_id):
     try:
             
