@@ -16,7 +16,7 @@ CORS(app)
 !! NOTE THIS WILL DROP ALL RECORDS AND START YOUR DB FROM SCRATCH
 !! NOTE THIS MUST BE UNCOMMENTED ON FIRST RUN
 '''
-# db_drop_and_create_all()
+db_drop_and_create_all()
 
 ## ROUTES
 '''
@@ -78,19 +78,30 @@ def concoctions():
 @app.route('/drinks', methods = ['POST'])
 # requires_auth('post:drinks')
 def new_drank():
-
-    body = request.get_json()
     # drank_title = json.get_request('title')
     # drank_recipe = json.get_request('recipe')
 
     # new_drank = Drink(drank_title, drank_recipe)
-    new_drink = Drink(title = body['title'], recipe = """{}""".format(body['recipe']))
-    Drink.insert(new_drink)
-
-    return jsonify({
-        'success': True,
-        'drinks': Drink.long(new_drank)
-    })
+    # new_drink = Drink(title = body['title'], recipe = """{}""".format(body['recipe']))
+    # Drink.insert(new_drink)
+    body = request.get_json()
+  
+    
+    ## if no form data 
+    if body == None:
+        abort(404)
+    new_recipe = body.get('recipe')
+    new_title = body.get('title')
+    try:
+        new_drink = Drink(title=new_title, recipe=json.dumps(new_recipe))
+        new_drink.insert()
+        new_drink = Drink.query.filter_by(id= new_drink.id).first()
+        return jsonify({
+            'success': True,
+            'drinks': new_drink
+        })
+    except:
+        abort(404)
 
 '''
 @TODO implement endpoint
@@ -104,12 +115,25 @@ def new_drank():
         or appropriate status code indicating reason for failure
 '''
 
-# @app.route('/drinks/<int:drink_id>', method = ['PATCH'])
+@app.route('/drinks/<int:drink_id>', methods = ['PATCH'])
 
-# def edit_drink():
-#         body = request.get_json()
+def edit_drank(drink_id):
 
-        
+        # grab information from front end in a simplified format
+    body = request.get_json()
+
+    title_edit = body.get('title')
+    recipe_edit = body.get('recipe')
+    drank_to_update = Drink.query.filter(Drink.id == drink_id).one_or_none()
+    drank_to_update.title = title_edit
+    drank_to_update.recipe = recipe_edit
+    Drink.update()
+
+    return jsonify({
+        'success': True,
+        'drinks': drink_to_update
+    })
+    
 
 
 '''
@@ -123,6 +147,19 @@ def new_drank():
         or appropriate status code indicating reason for failure
 '''
 
+@app.route('drinks/<int:drink_id>')
+def delete_da_drink(drink_id):
+    try:
+            
+        drank_to_delete = Drink.query.filter(Drink.id == drink_id).one_or_none()
+        drank_to_delete.delete()
+        return jsonify({
+            'success': True,
+            'delete': drink_id
+         })
+
+    except:
+        abort(404)
 
 ## Error Handling
 '''
@@ -147,13 +184,30 @@ def unprocessable(error):
 
 '''
 
+
 '''
 @TODO implement error handler for 404
     error handler should conform to general task above 
 '''
+@app.errorhandler(404)
+def page_not_found(error):
+    return jsonify({
+                    "success": False, 
+                    "error": 404,
+                    "message": "Page not found"
+                    }), 404
+
 
 
 '''
 @TODO implement error handler for AuthError
     error handler should conform to general task above 
 '''
+@app.errorhandler(AuthError)
+def unprocessable(error):
+    return jsonify({
+                    "success": False, 
+                    "error": AuthError,
+                    "message": "Error with authorization"
+                    }), AuthError
+
