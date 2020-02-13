@@ -4,6 +4,7 @@ __pycache__/
 test.db
 env/
 node_module/
+apiV2.py
 
 # OS generated files #
 ######################

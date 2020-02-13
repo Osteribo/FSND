@@ -4,7 +4,7 @@ from sqlalchemy import exc
 import json
 from flask_cors import CORS
 
-from .database.models import db_drop_and_create_all, setup_db, Drink
+from .database.models import db_drop_and_create_all, setup_db, Drink, db
 from .auth.auth import AuthError, requires_auth
 
 app = Flask(__name__)
@@ -52,7 +52,7 @@ def show_drinks():
 
 @app.route('/drinks-detail')
 @requires_auth('get:drinks-detail')
-def concoctions():
+def concoctions(token):
     try:
         drinks = Drink.query.all()
         return jsonify({
@@ -75,7 +75,7 @@ def concoctions():
 
 @app.route('/drinks', methods = ['POST'])
 @requires_auth('post:drinks')
-def new_drank():
+def new_drank(token):
     # drank_title = json.get_request('title')
     # drank_recipe = json.get_request('recipe')
 
@@ -100,7 +100,7 @@ def new_drank():
         print(new_drink)
         return jsonify({
             'success': True,
-            'drinks': new_drink
+            'drinks': new_drink.long()
         })
     except:
         abort(404)
@@ -119,7 +119,7 @@ def new_drank():
 
 @app.route('/drinks/<int:drink_id>', methods = ['PATCH'])
 @requires_auth('patch:drinks')
-def edit_drank(drink_id):
+def edit_drank(payload, drink_id):
 
         # grab information from front end in a simplified format
     body = request.get_json()
@@ -149,9 +149,9 @@ def edit_drank(drink_id):
         or appropriate status code indicating reason for failure
 '''
 
-@app.route('/drinks/<int:drink_id>')
+@app.route('/drinks/<int:drink_id>', methods=['DELETE'])
 @requires_auth('delete:drinks')
-def delete_da_drink(drink_id):
+def delete_da_drink(payload, drink_id):
     try:
             
         drank_to_delete = Drink.query.filter(Drink.id == drink_id).one_or_none()
@@ -213,4 +213,21 @@ def unprocessable(error):
                     "error": AuthError,
                     "message": "Error with authorization"
                     }), AuthError
+
+@app.errorhandler(401)
+def page_not_found(error):
+    return jsonify({
+                    "success": False, 
+                    "error": 401,
+                    "message": "Unauthorized"
+                    }), 401
+
+@app.errorhandler(400)
+def bad_request(error):
+    return jsonify({
+      "success": False,
+      "error": 400,
+      "message": "bad request"
+      }), 400
+
 

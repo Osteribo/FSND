@@ -49,7 +49,7 @@ def get_token_auth_header():
             'code': 'invalid_header',
             'description': 'Token not found.'
         }, 401)
-    elif len(part) >2 :
+    elif len(parts) >2 :
         raise AuthError({
             'code': 'invalid_header',
             'description': 'Authorization header must be bearer token.'
@@ -58,8 +58,6 @@ def get_token_auth_header():
     token = parts[1]
     return token
     
-    
-
 
 '''
 @TODO implement check_permissions(permission, payload) method
