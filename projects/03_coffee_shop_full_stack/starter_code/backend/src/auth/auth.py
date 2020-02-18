@@ -7,7 +7,7 @@ from urllib.request import urlopen
 
 AUTH0_DOMAIN = 'fsdn.auth0.com'
 ALGORITHMS = ['RS256']
-API_AUDIENCE = 'dev'
+API_AUDIENCE = 'Coffee'
 
 ## AuthError Exception
 '''
@@ -75,7 +75,7 @@ def check_permissions(permission, payload):
         abort(400)
     if permission not in payload['permissions']:
         abort(403)
-    raise Exception('Not Implemented')
+
 
 '''
 @TODO implement verify_decode_jwt(token) method

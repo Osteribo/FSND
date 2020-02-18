@@ -3,6 +3,7 @@ from flask import Flask, request, jsonify, abort
 from sqlalchemy import exc
 import json
 from flask_cors import CORS
+import jose 
 
 from .database.models import db_drop_and_create_all, setup_db, Drink, db
 from .auth.auth import AuthError, requires_auth
@@ -33,10 +34,13 @@ def show_drinks():
         # drinks = {}
         # for drink in Drink.query.all():
         #     drinks[drinks.id] = drinks.short()
-        drinks = Drink.query.all()
+        available_drinks = Drink.query.all()
+        drinks = [drink.short() for drink in available_drinks]
+        if len(drinks) == 0:
+                abort(404)
         return jsonify({
             'success': True,
-            'drinks': [drink.short() for drink in drinks]
+            'drinks': drinks
         })
     except:
         abort(400)
@@ -53,14 +57,14 @@ def show_drinks():
 @app.route('/drinks-detail')
 @requires_auth('get:drinks-detail')
 def concoctions(token):
-    try:
-        drinks = Drink.query.all()
-        return jsonify({
-            'success': True,
-            'drinks': [drink.long() for drink in drinks]
-        })
-    except:
+    selection = Drink.query.all()
+    drinks = [drink.long() for drink in selection]
+    if len(drinks) == 0:
         abort(404)
+    return jsonify({
+        'success': True,
+        'drinks': drinks
+    })
 
 
 '''
@@ -73,7 +77,7 @@ def concoctions(token):
         or appropriate status code indicating reason for failure
 '''
 
-@app.route('/drinks', methods = ['POST'])
+@app.route('/drinks', methods=['POST'])
 @requires_auth('post:drinks')
 def new_drank(token):
     # drank_title = json.get_request('title')
@@ -82,28 +86,23 @@ def new_drank(token):
     # new_drank = Drink(drank_title, drank_recipe)
     # new_drink = Drink(title = body['title'], recipe = """{}""".format(body['recipe']))
     # Drink.insert(new_drink)
-    body = request.get_json()
-    print(body)
-    
-    ## if no form data 
-    if body == None:
-        abort(404)
-    new_recipe = body.get('recipe')
-    print(new_recipe)
-    new_title = body.get('title')
-    print(new_title)
     try:
+        body = request.get_json()  
+        if body == None:
+            abort(404)
+        new_title = body.get('title')
+        new_recipe = body.get('recipe')
+        
+    
         new_drink = Drink(title=new_title, recipe=json.dumps(new_recipe))
-        print(new_drink)
         new_drink.insert()
         new_drink = Drink.query.filter_by(id= new_drink.id).first()
-        print(new_drink)
         return jsonify({
             'success': True,
-            'drinks': new_drink.long()
+            'drinks': [new_drink.long()]
         })
-    except:
-        abort(404)
+    except AuthError:
+         abort(422)
 
 '''
 @TODO implement endpoint
@@ -133,7 +132,7 @@ def edit_drank(payload, drink_id):
 
     return jsonify({
         'success': True,
-        'drinks': drink_to_update
+        'drinks': drank_to_update
     })
     
 
