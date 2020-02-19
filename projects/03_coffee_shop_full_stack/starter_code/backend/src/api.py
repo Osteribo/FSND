@@ -17,7 +17,7 @@ CORS(app)
 !! NOTE THIS WILL DROP ALL RECORDS AND START YOUR DB FROM SCRATCH
 !! NOTE THIS MUST BE UNCOMMENTED ON FIRST RUN
 '''
-# db_drop_and_create_all()
+db_drop_and_create_all()
 
 ## ROUTES
 '''
@@ -31,19 +31,23 @@ CORS(app)
 @app.route('/drinks')
 def show_drinks():
     try:
-        # drinks = {}
-        # for drink in Drink.query.all():
-        #     drinks[drinks.id] = drinks.short()
         available_drinks = Drink.query.all()
-        drinks = [drink.short() for drink in available_drinks]
+
+        print(available_drinks)
+        drinks = [drink.long() for drink in available_drinks]
+        print(drinks)
+
         if len(drinks) == 0:
-                abort(404)
+                abort(401)
+        if drinks is None:
+            abort(404)
+        
         return jsonify({
             'success': True,
             'drinks': drinks
-        })
-    except:
-        abort(400)
+        }) 
+    except Exception as e:
+            print(e)
 
 '''
 @TODO implement endpoint
@@ -80,12 +84,6 @@ def concoctions(token):
 @app.route('/drinks', methods=['POST'])
 @requires_auth('post:drinks')
 def new_drank(token):
-    # drank_title = json.get_request('title')
-    # drank_recipe = json.get_request('recipe')
-
-    # new_drank = Drink(drank_title, drank_recipe)
-    # new_drink = Drink(title = body['title'], recipe = """{}""".format(body['recipe']))
-    # Drink.insert(new_drink)
     try:
         body = request.get_json()  
         if body == None:
