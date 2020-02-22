@@ -194,11 +194,11 @@ class ArtistForm(Form):
         ]
     )
     phone = StringField(
-        # TODO implement validation logic for state
+
         'phone', validators=[DataRequired()]
     )
     genres = SelectMultipleField(
-        # TODO implement enum restriction
+
         'genres', validators=[DataRequired()],
         choices=[
             ('Alternative', 'Alternative'),
@@ -223,7 +223,7 @@ class ArtistForm(Form):
         ]
     )
     facebook_link = StringField(
-        # TODO implement enum restriction
+
         'facebook_link', validators=[URL(require_tld=True, message='please enter valid URL link')]
     )
     website = StringField(

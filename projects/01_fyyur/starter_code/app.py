@@ -278,7 +278,15 @@ def create_venue_submission():
   # TODO: modify data to be the data object returned from db insertion
 
   error = False
+  # form = VenueForm(request.form)
+  # if form.validate():
   try:
+      seeking_talent = False
+      seeking_description = ''
+      if 'seeking_talent' in request.form:
+          seeking_talent = request.form['seeking_talent'] == 'y'
+      if 'seeking_description' in request.form:
+          seeking_description = request.form['seeking_description']
       new_venue = Venue(
         name=request.form['name'],
         genres=request.form.getlist('genres'),
@@ -289,8 +297,8 @@ def create_venue_submission():
         website=request.form['website'],
         facebook_link=request.form['facebook_link'],
         image_link=request.form['image_link'],
-        seeking_talent=request.form['seeking_talent'],
-        description=request.form['seeking_description'],
+        seeking_talent=seeking_talent,
+        seeking_description=seeking_description,
       )
       #insert new venue records into the db
       db.session.add(new_venue)
@@ -362,7 +370,7 @@ def show_artist(artist_id):
   artist_query = Artist.query.get(artist_id)
   if artist_query:
     artist_details = Artist.details(artist_query)
-    # get the current time
+        # get the current time
     current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     new_shows_query = Show.query.options(db.joinedload(Show.Artist)).filter(Show.artist_id == artist_id).filter(Show.start_time > current_time).all()
     new_shows_list = list(map(Show.show_venue, new_shows_query))
@@ -408,7 +416,7 @@ def edit_artist_submission(artist_id):
           seeking_venue = False
           seeking_description = ''
           if 'seeking_venue' in request.form:
-              seeking_venue = request.form['seeking_venue'] == 'y'
+              seeking_venue = request.form['seeking_venue'] == 1
           if 'seeking_description' in request.form:
               seeking_description = request.form['seeking_description']
           setattr(artist_data, 'name', request.form['name'])
@@ -458,7 +466,7 @@ def edit_venue_submission(venue_id):
           seeking_talent = False
           seeking_description = ''
           if 'seeking_talent' in request.form:
-              seeking_talent = request.form['seeking_talent'] == 'y'
+              seeking_talent = request.form['seeking_talent'] == 1
           if 'seeking_description' in request.form:
               seeking_description = request.form['seeking_description']
           setattr(venue_data, 'name', request.form['name'])
@@ -496,12 +504,12 @@ def create_artist_submission():
     seeking_venue = False
     seeking_description = ''
     if 'seeking_venue' in request.form:
-      seeking_venue = request.form['seeking_venue'] == 'y'
+      seeking_venue = request.form['seeking_venue'] == 1
     if 'seeking_description' in request.form:
       seeking_description = request.form['seeking_description']
     new_artist = Artist(
       name=request.form['name'],
-      genres=request.form['genres'],
+      genres=request.form.getlist('genres'),
       city=request.form['city'],
       state= request.form['state'],
       phone=request.form['phone'],
