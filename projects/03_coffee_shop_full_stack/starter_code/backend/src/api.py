@@ -37,10 +37,10 @@ def show_drinks():
         drinks = [drink.long() for drink in available_drinks]
         print(drinks)
 
-        if len(drinks) == 0:
-                abort(401)
-        if drinks is None:
-            abort(404)
+        # if len(drinks) == 0:
+        #     abort(404)
+        # if drinks is None:
+        #     abort(404)
         
         return jsonify({
             'success': True,
@@ -63,8 +63,8 @@ def show_drinks():
 def concoctions(token):
     selection = Drink.query.all()
     drinks = [drink.long() for drink in selection]
-    if len(drinks) == 0:
-        abort(404)
+    # if len(drinks) == 0:
+    #     abort(404)
     return jsonify({
         'success': True,
         'drinks': drinks
@@ -120,17 +120,22 @@ def edit_drank(payload, drink_id):
 
         # grab information from front end in a simplified format
     body = request.get_json()
-
-    title_edit = body.get('title')
-    recipe_edit = body.get('recipe')
+    
+    title_update = body.get('title')
+    recipe_update = body.get('recipe')
     drank_to_update = Drink.query.filter(Drink.id == drink_id).one_or_none()
-    drank_to_update.title = title_edit
-    drank_to_update.recipe = recipe_edit
-    Drink.update()
+    print(drank_to_update)
+    if drank_to_update is None:
+        abort(404)
+    if title_update:
+        drank_to_update.title = title_update
+    if recipe_update:
+        drank_to_update.recipe = recipe_update
+    drank_to_update.update()
 
     return jsonify({
         'success': True,
-        'drinks': drank_to_update
+        'drinks': drank_to_update.long()
     })
     
 
